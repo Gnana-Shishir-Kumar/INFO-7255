@@ -1,0 +1,25 @@
+# ---- API image ----
+FROM python:3.11-slim
+
+ENV PYTHONUNBUFFERED=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_NO_CACHE_DIR=1
+
+WORKDIR /app
+
+# Install build deps if you need cryptography, psycopg, etc.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl ca-certificates build-essential gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements first for better caching
+COPY requirements.txt /app/
+RUN pip install -r requirements.txt
+
+# Copy the rest of the code
+COPY . /app
+
+EXPOSE 3000
+
+# Start your Flask app (adjust if you use Gunicorn)
+CMD ["python", "app.py"]
